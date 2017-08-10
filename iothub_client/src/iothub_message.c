@@ -26,6 +26,8 @@ typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG
     MAP_HANDLE properties;
     char* messageId;
     char* correlationId;
+    char* userDefinedContentType;
+    char* contentEncoding;
 }IOTHUB_MESSAGE_HANDLE_DATA;
 
 static bool ContainsOnlyUsAscii(const char* asciiValue)
@@ -450,6 +452,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetCorrelationId(IOTHUB_MESSAGE_HANDLE iotHu
         if (handleData->correlationId != NULL)
         {
             free(handleData->correlationId);
+            handleData->correlationId = NULL;
         }
 
         if (mallocAndStrcpy_s(&handleData->correlationId, correlationId) != 0)
@@ -482,6 +485,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetMessageId(IOTHUB_MESSAGE_HANDLE iotHubMes
         if (handleData->messageId != NULL)
         {
             free(handleData->messageId);
+            handleData->messageId = NULL;
         }
 
         /* Codes_SRS_IOTHUBMESSAGE_07_014: [If the allocation or the copying of the messageId fails, then IoTHubMessage_SetMessageId shall return IOTHUB_MESSAGE_ERROR.] */
@@ -512,6 +516,110 @@ const char* IoTHubMessage_GetMessageId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle
         IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
         result = handleData->messageId;
     }
+    return result;
+}
+
+IOTHUB_MESSAGE_RESULT IoTHubMessage_SetCustomContentType(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* contentType)
+{
+    IOTHUB_MESSAGE_RESULT result;
+
+    if (iotHubMessageHandle == NULL || contentType == NULL)
+    {
+        LogError("Invalid argument (iotHubMessageHandle=%p, contentType=%p)", iotHubMessageHandle, contentType);
+        result = IOTHUB_MESSAGE_INVALID_ARG;
+    }
+    else
+    {
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+
+        if (handleData->userDefinedContentType != NULL)
+        {
+            free(handleData->userDefinedContentType);
+            handleData->userDefinedContentType = NULL;
+        }
+
+        if (mallocAndStrcpy_s(&handleData->userDefinedContentType, contentType) != 0)
+        {
+            LogError("Failed saving a copy of contentType");
+            result = IOTHUB_MESSAGE_ERROR;
+        }
+        else
+        {
+            result = IOTHUB_MESSAGE_OK;
+        }
+    }
+
+    return result;
+}
+
+const char* IoTHubMessage_GetCustomContentType(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
+{
+    const char* result;
+
+    if (iotHubMessageHandle == NULL)
+    {
+        LogError("Invalid argument (iotHubMessageHandle is NULL)");
+        result = NULL;
+    }
+    else
+    {
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
+
+        result = (const char*)handleData->userDefinedContentType;
+    }
+
+    return result;
+}
+
+IOTHUB_MESSAGE_RESULT IoTHubMessage_SetContentEncoding(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* contentEncoding)
+{
+    IOTHUB_MESSAGE_RESULT result;
+
+    if (iotHubMessageHandle == NULL || contentEncoding == NULL)
+    {
+        LogError("Invalid argument (iotHubMessageHandle=%p, contentEncoding=%p)", iotHubMessageHandle, contentEncoding);
+        result = IOTHUB_MESSAGE_INVALID_ARG;
+    }
+    else
+    {
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+
+        if (handleData->contentEncoding != NULL)
+        {
+            free(handleData->contentEncoding);
+            handleData->contentEncoding = NULL;
+        }
+
+        if (mallocAndStrcpy_s(&handleData->contentEncoding, contentEncoding) != 0)
+        {
+            LogError("Failed saving a copy of contentEncoding");
+            result = IOTHUB_MESSAGE_ERROR;
+        }
+        else
+        {
+            result = IOTHUB_MESSAGE_OK;
+        }
+    }
+
+    return result;
+}
+
+const char* IoTHubMessage_GetContentEncoding(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
+{
+    const char* result;
+
+    if (iotHubMessageHandle == NULL)
+    {
+        LogError("Invalid argument (iotHubMessageHandle is NULL)");
+        result = NULL;
+    }
+    else
+    {
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
+
+        result = (const char*)handleData->contentEncoding;
+    }
+
     return result;
 }
 
